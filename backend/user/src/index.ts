@@ -9,11 +9,18 @@ import cors from "cors";
 dotenv.config();
 
 const app = express();
+// 1. CORS - Luôn đầu tiên
+app.use(cors()); 
+
+// 2️. Body parsers
 app.use(express.json());
 
+// 3️. Logger (nếu có)
+// app.use(morgan("dev"));
+
+// 4️. Routes - Cuối cùng
 app.use("/api/v1", userRouter);
 
-app.use(cors());
 connectDB();
 connectRabbitMQ();
 
