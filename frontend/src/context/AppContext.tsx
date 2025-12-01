@@ -122,7 +122,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           Authorization: `Bearer ${token}`,
         }
       });
-      setUser(data);
+      setUsers(data);
     } catch (error) {
       console.error(error);
     }
