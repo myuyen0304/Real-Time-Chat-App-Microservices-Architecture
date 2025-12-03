@@ -9,6 +9,8 @@ import toast from "react-hot-toast";
 import Cookies from "js-cookie";
 import axios from "axios";
 import ChatHeader from "@/components/ChatHeader";
+import ChatMessages from "@/components/ChatMessages";
+import MessageInput from "@/components/MessageInput";
 export interface Message {
   _id: string;
   chatId: string;
@@ -16,7 +18,7 @@ export interface Message {
   text?: string;
   image?: {
     url: string;
-    publiId: string;
+    publicId: string;
   };
   messageType: "text" | "image";
   seen: boolean;
@@ -99,6 +101,64 @@ const ChatApp = () => {
     }
   }
 
+  const handleMessageSend = async (e: any, imageFile?: File | null) => {
+    e.preventDefault();
+
+    if (!message.trim() && !imageFile && !selectedUser) return;
+
+    if (!selectedUser) return;
+
+    const token = Cookies.get("token");
+
+    try {
+      const formData = new FormData();
+
+      formData.append("chatId", selectedUser);
+      if (message.trim()) {
+        formData.append("text", message);
+      }
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
+      const { data } = await axios.post(
+        `${chat_service}/api/v1/message`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Response from server:", data); // Kiểm tra response
+      console.log("Message data:", data.message); // Kiểm tra message object
+
+      setMessages((prev) => {
+        const currentMessages = prev || [];
+        const messageExists = currentMessages.some(
+          (msg) => msg._id === data.message._id
+        );
+
+        if (!messageExists) {
+          return [...currentMessages, data.message];
+        }
+        return currentMessages;
+      });
+
+      setMessage("");
+      await fetchChats();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to send message");
+    }
+  };
+  const handleTyping = (value: string) => {
+    setMessage(value);
+    if (!selectedUser) return;
+    //  socket setup
+  };
   useEffect(() => {
     const loadChat = async () => {
       if (selectedUser) {
@@ -115,7 +175,6 @@ const ChatApp = () => {
 
   return (
     <div className="min-h-screen flex bg-gray-900 text-white overflow-hidden">
-      <ChatHeader setSidebarOpen={setSiderbarOpen} />
       <ChatSidebar
         sidebarOpen={siderbarOpen}
         setSidebarOpen={setSiderbarOpen}
@@ -131,6 +190,24 @@ const ChatApp = () => {
       />
       <div className="flex-1 flex flex-col justify-between p-4 backdrop-blur-xl bg-white/5 border border-white/10">
         {/* Chat content here */}
+        <ChatHeader
+          user={user}
+          setSidebarOpen={setSiderbarOpen}
+          isTyping={isTyping}
+        />
+
+        <ChatMessages
+          selectedUser={selectedUser}
+          messages={messages}
+          loggedInUser={loggedInUser}
+        />
+
+        <MessageInput
+          selectedUser={selectedUser}
+          message={message}
+          setMessage={handleTyping}
+          handleMessageSend={handleMessageSend}
+        />
       </div>
     </div>
   );
