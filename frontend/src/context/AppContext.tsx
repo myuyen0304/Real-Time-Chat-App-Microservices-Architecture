@@ -43,9 +43,9 @@ interface AppContextType {
   isAuth: boolean;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   setIsAuth: React.Dispatch<React.SetStateAction<boolean>>;
-  logoutUser: ()=> Promise<void>;
-  fetchUsers: ()=> Promise<void>;
-  fetchChats: ()=> Promise<void>;
+  logoutUser: () => Promise<void>;
+  fetchUsers: () => Promise<void>;
+  fetchChats: () => Promise<void>;
   chats: Chats[] | null;
   users: User[] | null;
   setChats: React.Dispatch<React.SetStateAction<Chats[] | null>>;
@@ -100,6 +100,11 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [chats, setChats] = useState<Chats[] | null>(null);
   async function fetchChats() {
     const token = Cookies.get("token");
+    // Kiểm tra token trước khi gọi API
+    if (!token) {
+      return;
+    }
+
     try {
       const { data } = await axios.get(`${chat_service}/api/v1/chat/all`, {
         headers: {
@@ -109,6 +114,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
       setChats(data.chats);
     } catch (error) {
       console.error(error);
+      // Không cần xử lý gì, chỉ log lỗi
     }
   }
 
@@ -116,28 +122,57 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
 
   async function fetchUsers() {
     const token = Cookies.get("token");
+    // Kiểm tra token trước khi gọi API
+    if (!token) {
+      return;
+    }
+
     try {
-      const {data} = await axios.get(`${user_service}/api/v1/user/all`,{
+      const { data } = await axios.get(`${user_service}/api/v1/user/all`, {
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
       setUsers(data);
     } catch (error) {
       console.error(error);
+      // Không cần xử lý gì, chỉ log lỗi
     }
   }
   useEffect(() => {
     const getUser = async () => {
       await fetchUser();
-      await fetchChats();
-      await fetchUsers();
     };
     getUser();
   }, []);
 
+  // Gọi fetchChats và fetchUsers chỉ khi đã authenticated
+  useEffect(() => {
+    if (isAuth && !loading) {
+      const loadData = async () => {
+        await fetchChats();
+        await fetchUsers();
+      };
+      loadData();
+    }
+  }, [isAuth, loading]);
+
   return (
-    <AppContext.Provider value={{ user, loading, isAuth, setUser, setIsAuth, logoutUser, fetchChats, fetchUsers, chats, users, setChats }}>
+    <AppContext.Provider
+      value={{
+        user,
+        loading,
+        isAuth,
+        setUser,
+        setIsAuth,
+        logoutUser,
+        fetchChats,
+        fetchUsers,
+        chats,
+        users,
+        setChats,
+      }}
+    >
       {children}
       <Toaster />
     </AppContext.Provider>
