@@ -45,7 +45,7 @@ const ChatMessages = ({
             {uniqueMessages.map((e, i) => {
               const isSentByMe = e.sender === loggedInUser?._id;
               const uniqueKey = `${e._id}-${i}`;
-              console.log(e);
+              // console.log(e);
               return (
                 <div
                   key={uniqueKey}
