@@ -62,22 +62,23 @@ const MessageInput = ({
             }}
           />
         </label>
-        <input 
-        type="text" 
-        className="flex-1 bg-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-400"
-        placeholder={imageFile ? "Add a caption..." : "Type a message..."}
-        value={message}
-        onChange={(e)=> setMessage(e.target.value)} />
-        <button type="submit" disabled={(!imageFile && !message) || isUploading}
-        className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed text-white">
-            {
-                isUploading ? (
-                <Loader2 className="w-4 h-4 animate-spin"/>
-                ) : (
-                <Send className="w-4 h-4"/>
-                )
-
-            }
+        <input
+          type="text"
+          className="flex-1 bg-gray-700 rounded-lg px-4 py-2 text-white placeholder-gray-400"
+          placeholder={imageFile ? "Add a caption..." : "Type a message..."}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button
+          type="submit"
+          disabled={(!imageFile && !message) || isUploading}
+          className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed text-white"
+        >
+          {isUploading ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Send className="w-4 h-4" />
+          )}
         </button>
       </div>
     </form>
