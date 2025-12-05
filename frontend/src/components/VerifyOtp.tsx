@@ -9,7 +9,14 @@ import Loading from "./Loading";
 import toast from "react-hot-toast";
 
 const VerifyOtp = () => {
-  const { isAuth, setIsAuth, setUser, loading: userLoading, fetchChats, fetchUsers} = useAppData();
+  const {
+    isAuth,
+    setIsAuth,
+    setUser,
+    loading: userLoading,
+    fetchChats,
+    fetchUsers,
+  } = useAppData();
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const [error, setError] = useState<string>("");
@@ -114,9 +121,9 @@ const VerifyOtp = () => {
     }
   };
 
-  if(userLoading) return <Loading/>;
+  if (userLoading) return <Loading />;
 
-  if(isAuth) redirect("/chat");
+  if (isAuth) redirect("/chat");
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center">
