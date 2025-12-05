@@ -30,12 +30,14 @@ backend/
 ### 1. User Service (Port 5000)
 
 **Chức năng:**
+
 - Đăng nhập bằng OTP (không cần password)
 - Xác thực OTP và cấp JWT token
 - Quản lý thông tin người dùng
 - Lấy danh sách users
 
 **API Endpoints:**
+
 ```
 POST   /api/v1/login          - Gửi OTP qua email
 POST   /api/v1/verify         - Xác thực OTP, trả về JWT token
@@ -46,6 +48,7 @@ GET    /api/v1/user/:id       - Lấy thông tin 1 user
 ```
 
 **Dependencies chính:**
+
 - `express` - Web framework
 - `mongoose` - MongoDB ODM
 - `jsonwebtoken` - JWT authentication
@@ -58,15 +61,18 @@ GET    /api/v1/user/:id       - Lấy thông tin 1 user
 ### 2. Mail Service (Port 5001)
 
 **Chức năng:**
+
 - Consumer RabbitMQ queue "send-otp"
 - Gửi email OTP qua SMTP (Gmail)
 
 **Message Queue Flow:**
+
 ```
 User Service → RabbitMQ (queue: send-otp) → Mail Service → Gmail SMTP
 ```
 
 **Dependencies chính:**
+
 - `nodemailer` - Email sender
 - `amqplib` - RabbitMQ consumer
 
@@ -75,12 +81,14 @@ User Service → RabbitMQ (queue: send-otp) → Mail Service → Gmail SMTP
 ### 3. Chat Service (Port 5002)
 
 **Chức năng:**
+
 - Tạo chat 1-1 giữa 2 users
 - Lấy danh sách chats với số tin nhắn chưa đọc
 - Gửi tin nhắn (text hoặc image)
 - Upload ảnh lên Cloudinary
 
 **API Endpoints:**
+
 ```
 POST   /api/v1/chat/new       - Tạo chat mới (cần auth)
 GET    /api/v1/chat/all       - Lấy tất cả chats (cần auth)
@@ -88,6 +96,7 @@ POST   /api/v1/message        - Gửi tin nhắn (cần auth, hỗ trợ image)
 ```
 
 **Dependencies chính:**
+
 - `cloudinary` - Image storage
 - `multer` - File upload middleware
 - `multer-storage-cloudinary` - Cloudinary storage engine
@@ -100,6 +109,7 @@ POST   /api/v1/message        - Gửi tin nhắn (cần auth, hỗ trợ image)
 ### Prerequisites
 
 Đảm bảo đã cài đặt:
+
 - **Node.js** v18 trở lên
 - **MongoDB** (local hoặc MongoDB Atlas)
 - **Redis** (local hoặc cloud)
@@ -133,6 +143,7 @@ npm install
 Tạo file `.env` trong mỗi thư mục service:
 
 #### **backend/user/.env**
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/chat_app
@@ -144,6 +155,7 @@ Rabbitmq_Password=guest
 ```
 
 #### **backend/mail/.env**
+
 ```env
 PORT=5001
 EMAIL_HOST=smtp.gmail.com
@@ -158,6 +170,7 @@ Rabbitmq_Password=guest
 **Lưu ý:** Để dùng Gmail, cần tạo [App Password](https://support.google.com/accounts/answer/185833)
 
 #### **backend/chat/.env**
+
 ```env
 PORT=5002
 MONGO_URI=mongodb://localhost:27017/chat_app
@@ -181,18 +194,21 @@ cd ../chat && npx tsc
 Mở 3 terminal riêng biệt:
 
 **Terminal 1 - User Service:**
+
 ```bash
 cd backend/user
 npm run dev
 ```
 
 **Terminal 2 - Mail Service:**
+
 ```bash
 cd backend/mail
 npm run dev
 ```
 
 **Terminal 3 - Chat Service:**
+
 ```bash
 cd backend/chat
 npm run dev
@@ -205,6 +221,7 @@ npm run dev
 ### 1. Đăng nhập (Login)
 
 **Request:**
+
 ```
 POST http://localhost:5000/api/v1/login
 Content-Type: application/json
@@ -215,6 +232,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "message": "OTP sent to your email"
@@ -224,6 +242,7 @@ Content-Type: application/json
 ### 2. Xác thực OTP
 
 **Request:**
+
 ```
 POST http://localhost:5000/api/v1/verify
 Content-Type: application/json
@@ -235,6 +254,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "message": "Login successful",
@@ -245,6 +265,7 @@ Content-Type: application/json
 ### 3. Lấy profile (cần token)
 
 **Request:**
+
 ```
 GET http://localhost:5000/api/v1/me
 Authorization: Bearer <your_token>
@@ -253,6 +274,7 @@ Authorization: Bearer <your_token>
 ### 4. Tạo chat
 
 **Request:**
+
 ```
 POST http://localhost:5002/api/v1/chat/new
 Authorization: Bearer <your_token>
@@ -266,6 +288,7 @@ Content-Type: application/json
 ### 5. Gửi tin nhắn (text)
 
 **Request:**
+
 ```
 POST http://localhost:5002/api/v1/message
 Authorization: Bearer <your_token>
@@ -278,6 +301,7 @@ chatId: "chat_id_here"
 ### 6. Gửi tin nhắn (với ảnh)
 
 **Request:**
+
 ```
 POST http://localhost:5002/api/v1/message
 Authorization: Bearer <your_token>
@@ -293,6 +317,7 @@ image: [file]
 ## Project Structure
 
 ### User Service
+
 ```
 user/
 ├── src/
@@ -315,6 +340,7 @@ user/
 ```
 
 ### Mail Service
+
 ```
 mail/
 ├── src/
@@ -326,6 +352,7 @@ mail/
 ```
 
 ### Chat Service
+
 ```
 chat/
 ├── src/
@@ -353,70 +380,83 @@ chat/
 ## Environment Variables Reference
 
 ### Required for User Service
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Server port | `5000` |
-| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/chat_app` |
-| `REDIS_URL` | Redis connection string | `redis://localhost:6379` |
-| `JWT_SECRET` | Secret key for JWT | `your_secret_key` |
-| `Rabbitmq_Host` | RabbitMQ hostname | `localhost` |
-| `Rabbitmq_Username` | RabbitMQ username | `guest` |
-| `Rabbitmq_Password` | RabbitMQ password | `guest` |
+
+| Variable            | Description               | Example                              |
+| ------------------- | ------------------------- | ------------------------------------ |
+| `PORT`              | Server port               | `5000`                               |
+| `MONGO_URI`         | MongoDB connection string | `mongodb://localhost:27017/chat_app` |
+| `REDIS_URL`         | Redis connection string   | `redis://localhost:6379`             |
+| `JWT_SECRET`        | Secret key for JWT        | `your_secret_key`                    |
+| `Rabbitmq_Host`     | RabbitMQ hostname         | `localhost`                          |
+| `Rabbitmq_Username` | RabbitMQ username         | `guest`                              |
+| `Rabbitmq_Password` | RabbitMQ password         | `guest`                              |
 
 ### Required for Mail Service
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Server port | `5001` |
-| `EMAIL_HOST` | SMTP host | `smtp.gmail.com` |
-| `EMAIL_PORT` | SMTP port | `587` |
-| `EMAIL_USER` | Email address | `your_email@gmail.com` |
-| `EMAIL_PASSWORD` | Email app password | `your_app_password` |
-| `Rabbitmq_Host` | RabbitMQ hostname | `localhost` |
-| `Rabbitmq_Username` | RabbitMQ username | `guest` |
-| `Rabbitmq_Password` | RabbitMQ password | `guest` |
+
+| Variable            | Description        | Example                |
+| ------------------- | ------------------ | ---------------------- |
+| `PORT`              | Server port        | `5001`                 |
+| `EMAIL_HOST`        | SMTP host          | `smtp.gmail.com`       |
+| `EMAIL_PORT`        | SMTP port          | `587`                  |
+| `EMAIL_USER`        | Email address      | `your_email@gmail.com` |
+| `EMAIL_PASSWORD`    | Email app password | `your_app_password`    |
+| `Rabbitmq_Host`     | RabbitMQ hostname  | `localhost`            |
+| `Rabbitmq_Username` | RabbitMQ username  | `guest`                |
+| `Rabbitmq_Password` | RabbitMQ password  | `guest`                |
 
 ### Required for Chat Service
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PORT` | Server port | `5002` |
-| `MONGO_URI` | MongoDB connection string | `mongodb://localhost:27017/chat_app` |
-| `Cloud_Name` | Cloudinary cloud name | `your_cloud_name` |
-| `Api_Key` | Cloudinary API key | `123456789012345` |
-| `Api_Secret` | Cloudinary API secret | `your_api_secret` |
-| `USER_SERVICE_URL` | User service URL | `http://localhost:5000` |
+
+| Variable           | Description               | Example                              |
+| ------------------ | ------------------------- | ------------------------------------ |
+| `PORT`             | Server port               | `5002`                               |
+| `MONGO_URI`        | MongoDB connection string | `mongodb://localhost:27017/chat_app` |
+| `Cloud_Name`       | Cloudinary cloud name     | `your_cloud_name`                    |
+| `Api_Key`          | Cloudinary API key        | `123456789012345`                    |
+| `Api_Secret`       | Cloudinary API secret     | `your_api_secret`                    |
+| `USER_SERVICE_URL` | User service URL          | `http://localhost:5000`              |
 
 ---
 
 ## Troubleshooting
 
 ### Lỗi kết nối MongoDB
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:27017
 ```
+
 **Giải pháp:** Đảm bảo MongoDB đang chạy hoặc dùng MongoDB Atlas.
 
 ### Lỗi kết nối Redis
+
 ```
 Error: connect ECONNREFUSED 127.0.0.1:6379
 ```
+
 **Giải pháp:** Đảm bảo Redis đang chạy hoặc dùng Redis cloud (Upstash).
 
 ### Lỗi kết nối RabbitMQ
+
 ```
 Error: ECONNRESET
 ```
+
 **Giải pháp:** Kiểm tra RabbitMQ đang chạy hoặc dùng CloudAMQP.
 
 ### Lỗi upload ảnh (Cloudinary)
+
 ```
 TypeError: Cannot read properties of undefined (reading 'uploader')
 ```
+
 **Giải pháp:** Kiểm tra API credentials trong `.env` của Chat Service.
 
 ### Lỗi gửi email
+
 ```
 Error: Invalid login: 535-5.7.8 Username and Password not accepted
 ```
+
 **Giải pháp:** Dùng App Password của Gmail thay vì mật khẩu thường.
 
 ---
@@ -424,6 +464,7 @@ Error: Invalid login: 535-5.7.8 Username and Password not accepted
 ## Development Tips
 
 ### Hot Reload
+
 Dùng `concurrently` để tự động build và restart khi code thay đổi:
 
 ```json
@@ -490,6 +531,405 @@ MIT
 ## Contributors
 
 -Mỹ Uyên (@myuyen0304)
+
+---
+
+---
+
+## 2. Frontend - Next.js 15 Real-Time Chat UI
+
+### Tech Stack
+
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **UI Library**: React 19
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **WebSocket**: Socket.IO Client
+- **State Management**: React Context API
+- **Authentication**: JWT (stored in cookies with js-cookie)
+- **Notifications**: react-hot-toast
+- **Icons**: Lucide React
+- **Date Formatting**: Moment.js
+
+---
+
+## Features
+
+### Authentication
+
+- ✅ OTP-based login (no password)
+- ✅ Email verification with 6-digit code
+- ✅ JWT token storage in cookies
+- ✅ Auto-redirect if authenticated
+
+### Chat Interface
+
+- ✅ Real-time messaging with Socket.IO
+- ✅ Text and image messages
+- ✅ Image upload to Cloudinary
+- ✅ Message read receipts (✓ sent, ✓✓ seen)
+- ✅ Unseen message count badges
+- ✅ Auto-scroll to latest message
+
+### User Presence
+
+- ✅ Online/offline status indicators
+- ✅ Typing indicator ("User is typing...")
+- ✅ Real-time online users list
+
+### UI/UX
+
+- ✅ Mobile responsive design
+- ✅ Sidebar toggle for mobile
+- ✅ Dark theme interface
+- ✅ User profile editing
+- ✅ Search users to start new chat
+
+---
+
+## Installation & Setup
+
+### Prerequisites
+
+- Node.js v18+
+- Backend services running (User, Mail, Chat)
+
+### Bước 1: Cài đặt dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+### Bước 2: Cấu hình API URLs
+
+Mở `src/context/AppContext.tsx` và cập nhật URLs:
+
+```typescript
+export const user_service = "http://localhost:5000";
+export const chat_service = "http://localhost:5002";
+```
+
+### Bước 3: Chạy development server
+
+```bash
+npm run dev
+```
+
+Truy cập: `http://localhost:3000`
+
+---
+
+## Project Structure
+
+```
+frontend/
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── layout.tsx            # Root layout với providers
+│   │   ├── page.tsx              # Landing page
+│   │   ├── login/
+│   │   │   └── page.tsx          # Login với OTP
+│   │   ├── verify/
+│   │   │   └── page.tsx          # Verify OTP page
+│   │   ├── chat/
+│   │   │   └── page.tsx          # Main chat interface
+│   │   └── profile/
+│   │       └── page.tsx          # User profile page
+│   │
+│   ├── components/               # React components
+│   │   ├── ChatSidebar.tsx       # Sidebar với chat list & user search
+│   │   ├── ChatHeader.tsx        # Header với user info & typing
+│   │   ├── ChatMessages.tsx      # Display messages với images
+│   │   ├── MessageInput.tsx      # Input với text & image upload
+│   │   ├── VerifyOtp.tsx         # OTP verification component
+│   │   └── Loading.tsx           # Loading spinner
+│   │
+│   └── context/                  # Global state
+│       ├── AppContext.tsx        # User auth & chat state
+│       └── SocketContext.tsx     # Socket.IO connection
+│
+├── public/                       # Static files
+├── package.json
+└── tsconfig.json
+```
+
+---
+
+## Context Providers
+
+### AppContext
+
+Quản lý user authentication và chat state:
+
+```typescript
+// Sử dụng trong component
+const { user, isAuth, loading, setUser, setIsAuth } = useAppData();
+```
+
+**State:**
+
+- `user`: User object (name, email, \_id)
+- `isAuth`: Boolean authentication status
+- `loading`: Loading state
+- `setUser`: Update user data
+- `setIsAuth`: Update auth status
+
+**Functions:**
+
+- `fetchUser()`: Lấy user từ JWT token
+- `fetchChats()`: Lấy danh sách chats
+- `fetchMessages()`: Lấy messages của chat
+
+### SocketContext
+
+Quản lý Socket.IO connection:
+
+```typescript
+// Sử dụng trong component
+const { socket, onlineUsers } = SocketData();
+```
+
+**State:**
+
+- `socket`: Socket.IO instance
+- `onlineUsers`: Array user IDs đang online
+
+**Events:**
+
+- Auto-connect khi user authenticated
+- Listen `getOnlineUser` event
+- Auto-disconnect khi logout
+
+---
+
+## Socket.IO Events
+
+### Client Emits
+
+```typescript
+// Join chat room
+socket.emit("joinChat", chatId);
+
+// Leave chat room
+socket.emit("leaveChat", chatId);
+
+// Typing indicator
+socket.emit("typing", { chatId, userId });
+socket.emit("stopTyping", { chatId, userId });
+```
+
+### Client Listens
+
+```typescript
+// Online users
+socket.on("getOnlineUser", (users: string[]) => {});
+
+// New message
+socket.on("newMessage", (message: Message) => {});
+
+// Typing events
+socket.on("userTyping", ({ chatId, userId }) => {});
+socket.on("userStoppedTyping", ({ chatId, userId }) => {});
+
+// Message seen
+socket.on("messageSeen", ({ chatId }) => {});
+```
+
+---
+
+## Pages Overview
+
+### 1. `/login` - Login Page
+
+**Chức năng:**
+
+- Nhập email để nhận OTP
+- Call API: `POST /api/v1/login`
+- Redirect sang `/verify` sau khi thành công
+
+### 2. `/verify` - OTP Verification
+
+**Chức năng:**
+
+- Nhập 6-digit OTP
+- Auto-focus giữa các input
+- Resend OTP với countdown 60s
+- Call API: `POST /api/v1/verify`
+- Lưu JWT token vào cookies
+- Redirect sang `/chat`
+
+### 3. `/chat` - Main Chat Interface
+
+**Layout:**
+
+```
+┌─────────────┬──────────────────────────────┐
+│             │  ChatHeader (user + typing)  │
+│ ChatSidebar ├──────────────────────────────┤
+│ (chat list) │  ChatMessages (text+image)   │
+│             ├──────────────────────────────┤
+│             │  MessageInput (send message) │
+└─────────────┴──────────────────────────────┘
+```
+
+**Features:**
+
+- Display chat list với unseen count
+- Show online status
+- Send text/image messages
+- Real-time updates
+- Typing indicator
+- Read receipts
+
+### 4. `/profile` - User Profile
+
+**Chức năng:**
+
+- View/edit user name
+- Show online status
+- Update via API: `POST /api/v1/update/user`
+- Back to chat button
+
+---
+
+## API Integration
+
+### Authentication
+
+```typescript
+// Login
+POST http://localhost:5000/api/v1/login
+Body: { email: "user@example.com" }
+
+// Verify OTP
+POST http://localhost:5000/api/v1/verify
+Body: { email: "user@example.com", otp: "123456" }
+
+// Get current user
+GET http://localhost:5000/api/v1/me
+Headers: { Authorization: "Bearer <token>" }
+```
+
+### Chat
+
+```typescript
+// Get all chats
+GET http://localhost:5002/api/v1/chat/all
+Headers: { Authorization: "Bearer <token>" }
+
+// Create new chat
+POST http://localhost:5002/api/v1/chat/new
+Headers: { Authorization: "Bearer <token>" }
+Body: { otherUserId: "user_id" }
+
+// Send message
+POST http://localhost:5002/api/v1/message
+Headers: {
+  Authorization: "Bearer <token>",
+  Content-Type: "multipart/form-data"
+}
+Body: FormData { chatId, text, image }
+```
+
+---
+
+## Styling Guide
+
+### Tailwind Classes
+
+**Colors:**
+
+- Background: `bg-gray-900`, `bg-gray-800`, `bg-gray-700`
+- Text: `text-white`, `text-gray-200`, `text-gray-400`
+- Accent: `bg-blue-600`, `text-blue-400`
+- Online: `bg-green-500`
+- Badge: `bg-red-600`
+
+**Responsive:**
+
+- Mobile first approach
+- Breakpoints: `sm:`, `md:`, `lg:`
+- Sidebar toggle: `sm:hidden` / `sm:translate-x-0`
+
+---
+
+## Build & Deploy
+
+### Build for production
+
+```bash
+npm run build
+```
+
+### Run production build
+
+```bash
+npm start
+```
+
+### Environment Variables (Optional)
+
+Nếu deploy, tạo `.env.local`:
+
+```env
+NEXT_PUBLIC_USER_SERVICE=https://your-user-service.com
+NEXT_PUBLIC_CHAT_SERVICE=https://your-chat-service.com
+```
+
+Và update `AppContext.tsx`:
+
+```typescript
+export const user_service =
+  process.env.NEXT_PUBLIC_USER_SERVICE || "http://localhost:5000";
+export const chat_service =
+  process.env.NEXT_PUBLIC_CHAT_SERVICE || "http://localhost:5002";
+```
+
+---
+
+## Troubleshooting
+
+### Socket không connect
+
+**Lỗi:** `Socket connection failed`
+
+**Giải pháp:**
+
+- Đảm bảo Chat Service (port 5002) đang chạy
+- Kiểm tra CORS trong backend socket config
+- Check URL trong SocketContext
+
+### Ảnh không hiển thị
+
+**Lỗi:** Image không load
+
+**Giải pháp:**
+
+- Kiểm tra Cloudinary credentials trong backend
+- Check network tab xem URL ảnh có đúng không
+- Đảm bảo `image.url` có trong message object
+
+### Unseen count sai
+
+**Lỗi:** Badge hiển thị số sai
+
+**Giải pháp:**
+
+- Check logic trong `moveChatToTop()`
+- Đảm bảo backend trả đúng `unseenCount`
+- Verify socket event `newMessage` logic
+
+### Token expired
+
+**Lỗi:** `401 Unauthorized`
+
+**Giải pháp:**
+
+- Login lại để lấy token mới
+- Check token expiry trong JWT_SECRET config
+- Clear cookies và login lại
 
 ---
 
